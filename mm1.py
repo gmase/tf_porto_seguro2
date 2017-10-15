@@ -253,12 +253,30 @@ def compare_results(file1,file2,truth):
    dtest.save_binary('meta_part_test.buffer')
    
    
-   
-   
-   
-def subConjuntoParaDeep(xgboost_name,choose_name):
-    #todo
-    print('TODO')
+def subConjuntoParaDeep():
+    dtrain_full = xgb.DMatrix(rutaOutputMeta+'meta_train_full.buffer')
+    dtest = xgb.DMatrix(rutaProcesados+'train_full.buffer',)
+    
+    adan=Booster(13,0.13,30,'no_name')
+    adan.evaluate(dtrain_full,dtest,rutaOutputMeta+"mm_para_deep.csv")
+    df_1 = pd.read_csv(
+          tf.gfile.Open(rutaOutputMeta+"mm_para_deep.csv"),
+          names=['id','pred'],
+          skipinitialspace=True,
+          engine="python",
+          skiprows=1)
+          
+    df_train = pd.read_csv(
+        tf.gfile.Open(train_file_name),
+        names=CSV_COLUMNS,
+        skipinitialspace=True,
+        engine="python",
+        skiprows=1)
+        
+    mask_for_deep=df_1<0.8
+    train_for_deep = df_train[mask_for_deep]
+    train_for_deep.to_csv(path_or_buf=rutaOutputMeta+'meta_for_deep.csv',sep=',')
+
     
     
 def componeSolucionFinal(deep_name,xgboost_name,choose_name):
@@ -290,7 +308,7 @@ def componeSolucionFinal(deep_name,xgboost_name,choose_name):
    f.write("id,target\n")
    for v1,v2,c in zip(df_1.values,df_2.values,df_choose['choose']):
        f.write("{},".format(int(v1[0])))
-       if c>=0.86:
+       if c>=0.8:
            f.write("{}\n".format(v1[1]))
            cuenta_boost+=1
        else:
@@ -399,12 +417,14 @@ def main(_):
     #trainMetaModel(1)
     
     #Step2 compose the output
-    genOutput()
+    #genOutput()
     
     #compare_results(rutaOutputXgboost+'xgboost_train_full.csv',rutaOutputDeep+'deep_train_full.csv',train_file_name)
 
     #trainMetaModel(5)
-    #genOutput()
+    genOutput()
+
+    subConjuntoParaDeep()
 
     
 

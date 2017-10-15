@@ -33,6 +33,7 @@ rutaOrigen='//home//gmase//Documents//tensorflow//tf_porto_seguro2//origin//'
 rutaProcesados='//home//gmase//Documents//tensorflow//tf_porto_seguro2//processed//'
 rutaOutputXgboost='//home//gmase//Documents//tensorflow//tf_porto_seguro2//xgboost_output//'
 rutaOutputDeep='//home//gmase//Documents//tensorflow//tf_porto_seguro2//deep_output//'
+rutaOutputMeta='//home//gmase//Documents//tensorflow//tf_porto_seguro2//meta_output//'
 
 test_file_name=rutaOrigen+'test.csv'
 train_file_name=rutaOrigen+'train.csv'
@@ -542,13 +543,48 @@ def train_and_evalOnlyMM(model_dir, model_type, train_steps, train_data, test_da
     
     return 0
 
+def train_and_evalSubsetMM(model_dir, model_type, train_steps, train_data, test_data,just_test,learning_rate,layers):
+    train_df = pd.read_csv(
+        tf.gfile.Open(rutaOutputMeta+'meta_for_deep.csv'),
+        names=CSV_COLUMNS,
+        skipinitialspace=True,
+        engine="python",
+        skiprows=1)
+    # remove NaN elements
+    train_df = train_df.dropna(how="any", axis=0)
+    model_dir = tempfile.mkdtemp() if not model_dir else model_dir
+    m = build_estimator(model_dir, model_type,learning_rate,layers)
 
+    m.train(
+          input_fn=input_fn(train_df, num_epochs=None,num_threads=5, shuffle=True),
+        steps=train_steps)
+
+    y = m.predict(input_fn=input_predict(test_file_name, num_epochs=1, shuffle=False))
+    df_test = pd.read_csv(
+        tf.gfile.Open(test_file_name),
+        names=[]+CSV_COLUMNS[0:1]+CSV_COLUMNS[2:],
+        skipinitialspace=True,
+        engine="python",
+        skiprows=1)
+
+    f = open(rutaOutputDeep+'deep_from_mm.csv', 'w')
+    f.write("id,target\n")
+    for i,p in enumerate(y):
+        f.write("{},{}\n".format(df_test['id'][i],p["probabilities"][1]))
+        
+    f.close()
+  
+    return 0
+    
 FLAGS = None
 
 
 def main(_):
     f = open(rutaOutputDeep+'eval_log.csv', 'a')
     
+    
+    train_and_evalOnlyMM(FLAGS.model_dir, FLAGS.model_type, FLAGS.train_steps,
+                 FLAGS.train_data, FLAGS.test_data,FLAGS.just_test,0.07,[1024, 512, 256])    
     
     train_and_evalOnlyMM(FLAGS.model_dir, FLAGS.model_type, FLAGS.train_steps,
                  FLAGS.train_data, FLAGS.test_data,FLAGS.just_test,0.07,[1024, 512, 256])
