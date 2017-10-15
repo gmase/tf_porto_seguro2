@@ -313,8 +313,8 @@ def main(_):
 
     
     #Step 2 evolve
-    evolve()
-    sys.exit("Quieto parao")
+    #evolve()
+    #sys.exit("Quieto parao")
 
     #Step 3 do predict
 
@@ -325,17 +325,18 @@ def main(_):
     #depth: 5  rounds: 38  eta: 0.22
     #depth: 2  rounds: 20  eta: 0.3 auc: 0.632719 caca
     #depth: 4  rounds: 39  eta: 0.3 auc: 0.64922
+    #depth: 5  rounds: 33  eta: 0.27 auc: 0.637384
 
     
     dtrain_full = xgb.DMatrix(rutaProcesados+'train_full.buffer')
     dtest_full = xgb.DMatrix(rutaProcesados+'test_full.buffer')
-    getOutput(4,39,0.3,dtrain_full,dtest_full,rutaOutputXgboost+'xgboost_full.csv')
-    sys.exit("Quieto parao")
+    getOutput(5,33,0.27,dtrain_full,dtest_full,rutaOutputXgboost+'xgboost_full.csv')
+    #sys.exit("Quieto parao")
     
     
     #Step 4 predict for test set
     dtrain_full = xgb.DMatrix(rutaProcesados+'train_full.buffer')
-    getOutput(4,39,0.3,dtrain_full,dtrain_full,rutaOutputXgboost+'xgboost_train_full.csv')
+    getOutput(5,33,0.27,dtrain_full,dtrain_full,rutaOutputXgboost+'xgboost_train_full.csv')
     
 
     #w = np.random.rand(5, 1)

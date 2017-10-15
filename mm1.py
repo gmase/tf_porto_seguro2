@@ -290,7 +290,7 @@ def componeSolucionFinal(deep_name,xgboost_name,choose_name):
    f.write("id,target\n")
    for v1,v2,c in zip(df_1.values,df_2.values,df_choose['choose']):
        f.write("{},".format(int(v1[0])))
-       if c>=0.9:
+       if c>=0.86:
            f.write("{}\n".format(v1[1]))
            cuenta_boost+=1
        else:
@@ -393,7 +393,7 @@ def xgboostFails(file1,truth):
    
 def main(_):
     #Step1 prepare the files
-    #xgboostFails(rutaOutputXgboost+'xgboost_train_full.csv',train_file_name)
+    xgboostFails(rutaOutputXgboost+'xgboost_train_full.csv',train_file_name)
     
     #Step2 train the model
     #trainMetaModel(1)
