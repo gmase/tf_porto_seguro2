@@ -280,7 +280,7 @@ def evolve():
     f = open('eval_log.csv', 'a')
     f.write('\n')
  
-    generation_number=10 
+    generation_number=20 
     
     for gen in range(generation_number):
         for i in population:
@@ -314,8 +314,6 @@ def main(_):
     
     #Step 2 evolve
     evolve()
-    
-    
     sys.exit("Quieto parao")
 
     #Step 3 do predict
@@ -328,9 +326,16 @@ def main(_):
     #depth: 2  rounds: 20  eta: 0.3 auc: 0.632719 caca
     #depth: 4  rounds: 39  eta: 0.3 auc: 0.64922
 
+    
     dtrain_full = xgb.DMatrix(rutaProcesados+'train_full.buffer')
     dtest_full = xgb.DMatrix(rutaProcesados+'test_full.buffer')
-    getOutput(5,38,0.22,dtrain_full,dtest_full,rutaOutputXgboost+'xgboost_train_full.csv')
+    getOutput(4,39,0.3,dtrain_full,dtest_full,rutaOutputXgboost+'xgboost_full.csv')
+    sys.exit("Quieto parao")
+    
+    
+    #Step 4 predict for test set
+    dtrain_full = xgb.DMatrix(rutaProcesados+'train_full.buffer')
+    getOutput(4,39,0.3,dtrain_full,dtrain_full,rutaOutputXgboost+'xgboost_train_full.csv')
     
 
     #w = np.random.rand(5, 1)

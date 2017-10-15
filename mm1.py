@@ -37,6 +37,7 @@ rutaOrigen='//home//gmase//Documents//tensorflow//tf_porto_seguro2//origin//'
 rutaProcesados='//home//gmase//Documents//tensorflow//tf_porto_seguro2//processed//'
 rutaOutputXgboost='//home//gmase//Documents//tensorflow//tf_porto_seguro2//xgboost_output//'
 rutaOutputDeep='//home//gmase//Documents//tensorflow//tf_porto_seguro2//deep_output//'
+rutaOutputMeta='//home//gmase//Documents//tensorflow//tf_porto_seguro2//meta_output//'
 
 test_file_name=rutaOrigen+'test.csv'
 train_file_name=rutaOrigen+'train.csv'
@@ -187,7 +188,7 @@ class Booster:
         bst.save_model('0001.model')
         
         
-        test_file_name='//home//gmase//Documents//tensorflow//tf_porto_seguro//test.csv'
+        test_file_name=rutaOrigen+'test.csv'
         df_test = pd.read_csv(
           tf.gfile.Open(test_file_name),
           names=[]+CSV_COLUMNS[0:1]+CSV_COLUMNS[2:],
@@ -254,6 +255,12 @@ def compare_results(file1,file2,truth):
    
    
    
+   
+def subConjuntoParaDeep(xgboost_name,choose_name):
+    #todo
+    print('TODO')
+    
+    
 def componeSolucionFinal(deep_name,xgboost_name,choose_name):
    df_1 = pd.read_csv(
           tf.gfile.Open(xgboost_name),
@@ -279,11 +286,11 @@ def componeSolucionFinal(deep_name,xgboost_name,choose_name):
    
    cuenta_deep=0
    cuenta_boost=0
-   f = open('META_output.csv', 'w')
+   f = open(rutaOutputMeta+'META_output.csv', 'w')
    f.write("id,target\n")
    for v1,v2,c in zip(df_1.values,df_2.values,df_choose['choose']):
        f.write("{},".format(int(v1[0])))
-       if c>=0.5:
+       if c>=0.9:
            f.write("{}\n".format(v1[1]))
            cuenta_boost+=1
        else:
@@ -295,18 +302,17 @@ def componeSolucionFinal(deep_name,xgboost_name,choose_name):
           
           
 def genOutput():
-    dtrain_full = xgb.DMatrix('meta_train_full.buffer',missing=-1)
-    dtest_full = xgb.DMatrix('//home//gmase//Documents//tensorflow//tf_porto_seguro//xgboost//test_full.buffer',missing=-1)
+    dtrain_full = xgb.DMatrix(rutaOutputMeta+'meta_train_full.buffer')
+    dtest_full = xgb.DMatrix(rutaProcesados+'test_full.buffer',)
     
     adan=Booster(13,0.13,30,'no_name')
-    adan.evaluate(dtrain_full,dtest_full,"mm_final.csv")
-    componeSolucionFinal('deep_test_full.csv','xgboost_test_full.csv',"mm_final.csv")
+    adan.evaluate(dtrain_full,dtest_full,rutaOutputMeta+"mm_final.csv")
+    componeSolucionFinal(rutaOutputDeep+'deep_full.csv',rutaOutputXgboost+'xgboost_full.csv',rutaOutputMeta+"mm_final.csv")
     
     
 def trainMetaModel(generaciones):
-    dtrain = xgb.DMatrix('meta_part_train.buffer',missing=-1)
-    dtest = xgb.DMatrix('meta_part_test.buffer',missing=-1)
-    
+    dtrain = xgb.DMatrix(rutaOutputMeta+'meta_part_train.buffer')
+    dtest = xgb.DMatrix(rutaOutputMeta+'meta_part_test.buffer')
     
     #depth: 6  rounds: 30  eta: 0.33 auc: 0.932554
     
@@ -346,14 +352,58 @@ def trainMetaModel(generaciones):
         
     population[0].muestrate()
     f.close()
-    sys.exit("Quieto parao")
     
+    #file1=xgboost
+def xgboostFails(file1,truth):
+   df_1 = pd.read_csv(
+          tf.gfile.Open(file1),
+          names=['id','pred'],
+          skipinitialspace=True,
+          engine="python",
+          skiprows=1)
+          
+   df_truth = pd.read_csv(
+          tf.gfile.Open(truth),
+          names=CSV_COLUMNS,
+          skipinitialspace=True,
+          engine="python",
+          skiprows=1)
+          
+   df_compare=(df_truth['reporta']-df_1['pred'])**2
+   difer=df_compare.iloc[:]<0.3
+   print (difer)
+   
+   dtrain_full = xgb.DMatrix(rutaProcesados+'train_full.buffer')
+   dtrain_full.set_label(difer)
+   
+   dtrain_full.save_binary(rutaOutputMeta+'meta_train_full.buffer')
+
+    #Cambio de label para conjunto test 0.8
+   np.random.seed(42)
+   msk = np.random.rand(len(difer)) < 0.8
+   label_train = difer[msk]
+   label_test = difer[~msk]
+    
+   dtrain = xgb.DMatrix(rutaProcesados+'train_train_0.buffer')
+   dtrain.set_label(label_train)
+   dtrain.save_binary(rutaOutputMeta+'meta_part_train.buffer')
+   dtest = xgb.DMatrix(rutaProcesados+'train_test_0.buffer')
+   dtest.set_label(label_test)
+   dtest.save_binary(rutaOutputMeta+'meta_part_test.buffer')
+   
 def main(_):
+    #Step1 prepare the files
+    #xgboostFails(rutaOutputXgboost+'xgboost_train_full.csv',train_file_name)
+    
+    #Step2 train the model
+    #trainMetaModel(1)
+    
+    #Step2 compose the output
+    genOutput()
+    
+    #compare_results(rutaOutputXgboost+'xgboost_train_full.csv',rutaOutputDeep+'deep_train_full.csv',train_file_name)
 
-
-    compare_results('xgboost_train_full.csv','deep_train_full.csv','//home//gmase//Documents//tensorflow//tf_porto_seguro//train.csv')
-
-    trainMetaModel(5)
+    #trainMetaModel(5)
     #genOutput()
 
     
