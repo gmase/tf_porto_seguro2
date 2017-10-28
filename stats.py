@@ -4,9 +4,10 @@ import argparse
 import numpy as np
 import pandas as pd
 import sys
+import tensorflow as tf
 from bokeh.layouts import gridplot
 from bokeh.plotting import figure, show, output_file
-from bokeh.sampledata.stocks import AAPL, GOOG, IBM, MSFT
+#from bokeh.sampledata.stocks import AAPL, GOOG, IBM, MSFT
 
 rutaOrigen='//home//gmase//Documents//tensorflow//tf_porto_seguro2//origin//'
 rutaProcesados='//home//gmase//Documents//tensorflow//tf_porto_seguro2//processed//'
@@ -54,9 +55,7 @@ FLAGS = None
 def datetime(x):
     return np.array(x, dtype=np.datetime64)
 
-def pruebaStocks():
-
-    
+def pruebaStocks():   
     aapl = np.array(AAPL['adj_close'])
     aapl_dates = np.array(AAPL['date'], dtype=np.datetime64)
     
@@ -82,9 +81,64 @@ def pruebaStocks():
     show(gridplot([[p2]], plot_width=400, plot_height=400))  # open a browser
 
 
+    
+def pintaGrafica(trainSet):
+    reporta=trainSet['reporta']
+    total=reporta.count()
+    msk=reporta==1
+    fullGrid=list()
+    
+    for field in CSV_COLUMNS[2:]:
+        campoEstudio=trainSet[field]
+        campoEstudioPositives=campoEstudio[msk]
+        
+        #window_size = 30
+        #window = np.ones(window_size)/float(window_size)
+        #aapl_avg = np.convolve(campoEstudio, window, 'same')
+        
+        p1 = figure(x_axis_type="linear", title=field)
+        p1.grid.grid_line_alpha = 0
+        p1.xaxis.axis_label = 'Field values'
+        p1.yaxis.axis_label = 'Value repetitions'
+        p1.ygrid.band_fill_color = "olive"
+        p1.ygrid.band_fill_alpha = 0.1
+        
+        p2 = figure(x_axis_type="linear", title=field)
+        p2.grid.grid_line_alpha = 0
+        p2.xaxis.axis_label = 'Field values'
+        p2.yaxis.axis_label = 'Positives %'
+        p2.ygrid.band_fill_color = "olive"
+        p2.ygrid.band_fill_alpha = 0.1
+        
+        hist, edges = np.histogram(campoEstudio, density=False, bins=10)
+        p1.quad(top=hist*100/total, bottom=0, left=edges[:-1], right=edges[1:],
+            fill_color="#036564", line_color="#033649")
+            
+        hist2, edges2 = np.histogram(campoEstudioPositives, density=False, bins=10)
+        hist2=hist2*100.0/hist
+        p2.quad(top=hist2, bottom=0, left=edges2[:-1], right=edges2[1:],
+            fill_color="#036564", line_color="#033649")
+            
+        p2.legend.location = "top_left"
+        fullGrid.append([p1,p2])
+    
+    
+    output_file("PortoSeguroStats.html", title="stats.py")
+    show(gridplot(fullGrid, plot_width=400, plot_height=400))  # open a browser
+    #show(gridplot([[p1,p2]], plot_width=400, plot_height=400))  # open a browser
+
 def main():
 
-    pruebaStocks()
+    #pruebaStocks()
+    
+    trainSet = pd.read_csv(
+        tf.gfile.Open(train_file_name),
+        names=CSV_COLUMNS,
+        skipinitialspace=True,
+        engine="python",
+        skiprows=1)
+    ind_05_classes = trainSet['ps_ind_05_cat'].unique()
+    pintaGrafica(trainSet)
     """
     trainSet=pd.read_csv(filepath_or_buffer='train.csv',sep=',', delimiter=None, header='infer')
     testSet=pd.read_csv(filepath_or_buffer='test.csv',sep=',', delimiter=None, header='infer')
