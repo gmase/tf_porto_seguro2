@@ -308,16 +308,28 @@ def componeSolucionFinal(deep_name,xgboost_name,choose_name):
    f.write("id,target\n")
    for v1,v2,c in zip(df_1.values,df_2.values,df_choose['choose']):
        f.write("{},".format(int(v1[0])))
+       if c>=0.5:
+           val=(v1[1]*2.0+v2[1])/3.0
+           cuenta_boost+=1
+       else:
+           val=(v1[1]+2.0*v2[1])/3.0
+           cuenta_deep+=1
+       f.write("{}\n".format(val))
+   f.close()
+   print('De boost salen: {}  De deep: {}'.format(cuenta_boost,cuenta_deep))
+          
+   """      
+   f = open(rutaOutputMeta+'META_output.csv', 'w')
+   f.write("id,target\n")
+   for v1,v2,c in zip(df_1.values,df_2.values,df_choose['choose']):
+       f.write("{},".format(int(v1[0])))
        if c>=0.8:
            f.write("{}\n".format(v1[1]))
            cuenta_boost+=1
        else:
            f.write("{}\n".format(v2[1]))
            cuenta_deep+=1
-   f.close()
-   print('De boost salen: {}  De deep: {}'.format(cuenta_boost,cuenta_deep))
-          
-          
+   """          
           
 def genOutput():
     dtrain_full = xgb.DMatrix(rutaOutputMeta+'meta_train_full.buffer')
@@ -411,7 +423,7 @@ def xgboostFails(file1,truth):
    
 def main(_):
     #Step1 prepare the files
-    xgboostFails(rutaOutputXgboost+'xgboost_train_full.csv',train_file_name)
+    #xgboostFails(rutaOutputXgboost+'xgboost_train_full.csv',train_file_name)
     
     #Step2 train the model
     #trainMetaModel(1)
@@ -424,7 +436,7 @@ def main(_):
     #trainMetaModel(5)
     genOutput()
 
-    subConjuntoParaDeep()
+    #subConjuntoParaDeep()
 
     
 

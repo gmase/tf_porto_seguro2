@@ -162,16 +162,20 @@ base_columns = [
    ps_ind_01,ps_ind_02_cat,ps_ind_03,ps_ind_04_cat,ps_ind_05_cat,ps_ind_06_bin,ps_ind_07_bin,ps_ind_08_bin,ps_ind_09_bin,ps_ind_10_bin,ps_ind_11_bin,ps_ind_12_bin,ps_ind_13_bin,ps_ind_14,ps_ind_15,ps_ind_16_bin,ps_ind_17_bin,ps_ind_18_bin,ps_reg_01,ps_reg_02,ps_reg_03,ps_car_01_cat,ps_car_02_cat,ps_car_03_cat,ps_car_04_cat,ps_car_05_cat,ps_car_06_cat,ps_car_07_cat,ps_car_08_cat,ps_car_09_cat,ps_car_10_cat,ps_car_11_cat,ps_car_11,ps_car_12,ps_car_13,ps_car_14,ps_car_15,ps_calc_01,ps_calc_02,ps_calc_03,ps_calc_04,ps_calc_05,ps_calc_06,ps_calc_07,ps_calc_08,ps_calc_09,ps_calc_10,ps_calc_11,ps_calc_12,ps_calc_13,ps_calc_14,ps_calc_15_bin,ps_calc_16_bin,ps_calc_17_bin,ps_calc_18_bin,ps_calc_19_bin,ps_calc_20_bin,
 ]
 
-"""
 crossed_columns = [
     tf.feature_column.crossed_column(
-        ["education", "occupation"], hash_bucket_size=1000),
-    tf.feature_column.crossed_column(
-        [age_buckets, "education", "occupation"], hash_bucket_size=1000),
-    tf.feature_column.crossed_column(
-        ["native_country", "occupation"], hash_bucket_size=1000)
+        ["ps_car_01_cat",
+"ps_car_02_cat",
+"ps_car_03_cat",
+"ps_car_04_cat",
+"ps_car_05_cat",
+"ps_car_06_cat",
+"ps_car_07_cat",
+"ps_car_08_cat",
+"ps_car_09_cat",
+"ps_car_10_cat",
+"ps_car_11_cat"], hash_bucket_size=4000)
 ]
-"""
 
 """
     tf.feature_column.embedding_column(ps_ind_02_cat, dimension=8),
@@ -209,12 +213,7 @@ crossed_columns = [
 
 dimensionForEmbedding=[3,2,4,5,2,4,2,5,2,2,2,3,3,10]
 
-deep_columns = [
-
-
-    tf.feature_column.indicator_column(ps_ind_02_cat),
-    tf.feature_column.indicator_column(ps_ind_04_cat),
-    tf.feature_column.indicator_column(ps_ind_05_cat),
+"""
     tf.feature_column.indicator_column(ps_car_01_cat),
     tf.feature_column.indicator_column(ps_car_02_cat),
     tf.feature_column.indicator_column(ps_car_03_cat),
@@ -228,7 +227,12 @@ deep_columns = [
     tf.feature_column.indicator_column(ps_car_10_cat),
     #tf.feature_column.indicator_column(ps_car_11_cat),
     tf.feature_column.embedding_column(ps_car_11_cat, dimensionForEmbedding[13]),
-
+"""
+    
+deep_columns = [
+    tf.feature_column.indicator_column(ps_ind_02_cat),
+    tf.feature_column.indicator_column(ps_ind_04_cat),
+    tf.feature_column.indicator_column(ps_ind_05_cat),
     ps_ind_01,
     ps_ind_03,
     ps_ind_14,
@@ -318,16 +322,16 @@ def build_estimator(model_dir, model_type,learning_rate,layers):
         model_dir=model_dir,
         feature_columns=deep_columns,
         hidden_units=layers,
-
         optimizer=tf.train.AdagradOptimizer( learning_rate=learning_rate)
     )
     
   else:
     m = tf.estimator.DNNLinearCombinedClassifier(
         model_dir=model_dir,
-        #linear_feature_columns=crossed_columns,
+        linear_feature_columns=crossed_columns,
         dnn_feature_columns=deep_columns,
-        dnn_hidden_units=[100, 50])
+        dnn_hidden_units=layers
+        )
   return m
 
 
@@ -582,7 +586,7 @@ FLAGS = None
 def main(_):
     f = open(rutaOutputDeep+'eval_log.csv', 'a')
     
-    
+    """
     train_and_evalOnlyMM(FLAGS.model_dir, FLAGS.model_type, FLAGS.train_steps,
                  FLAGS.train_data, FLAGS.test_data,FLAGS.just_test,0.07,[1024, 512, 256])    
     
@@ -593,11 +597,11 @@ def main(_):
     train_and_evalMM(FLAGS.model_dir, FLAGS.model_type, FLAGS.train_steps,
                  FLAGS.train_data, FLAGS.test_data,FLAGS.just_test,0.07,[1024, 512, 256])
     sys.exit("Quieto parao")
-    
+    """
     
     """
     res=[]
-    repeticiones=1
+    repeticiones=4
     for i in range(repeticiones):
           res.append(train_and_eval(FLAGS.model_dir, FLAGS.model_type, FLAGS.train_steps,
                  FLAGS.train_data, FLAGS.test_data,FLAGS.just_test,0.07,[1024, 512, 256]))
@@ -607,7 +611,7 @@ def main(_):
     """
 
     
-    """
+    
     res=[]
     repeticiones=4
     for i in range(repeticiones):
@@ -625,8 +629,24 @@ def main(_):
     auc=sum(res)/repeticiones
     print("auc: {}  gini: {}".format(auc,auc*2-1))
     f.write('Media de las ultimas {} iteraciones: {} Gini:{}'.format(repeticiones,auc,auc*2-1))
-    """
     
+    res=[]
+    repeticiones=4
+    for i in range(repeticiones):
+          res.append(train_and_eval(FLAGS.model_dir, FLAGS.model_type, FLAGS.train_steps,
+                 FLAGS.train_data, FLAGS.test_data,FLAGS.just_test,0.1,[1024, 512, 256]))
+    auc=sum(res)/repeticiones
+    print("auc: {}  gini: {}".format(auc,auc*2-1))
+    f.write('Media de las ultimas {} iteraciones: {} Gini:{}'.format(repeticiones,auc,auc*2-1))
+    
+    res=[]
+    repeticiones=4
+    for i in range(repeticiones):
+          res.append(train_and_eval(FLAGS.model_dir, FLAGS.model_type, FLAGS.train_steps,
+                 FLAGS.train_data, FLAGS.test_data,FLAGS.just_test,0.04,[1024, 512, 256]))
+    auc=sum(res)/repeticiones
+    print("auc: {}  gini: {}".format(auc,auc*2-1))
+    f.write('Media de las ultimas {} iteraciones: {} Gini:{}'.format(repeticiones,auc,auc*2-1))
     f.close()
 
     
@@ -644,7 +664,7 @@ if __name__ == "__main__":
   parser.add_argument(
       "--model_type",
       type=str,
-      default="deep2",
+      default="wide_n_deep",
       help="Valid model types: {'wide', 'deep','deep2', 'wide_n_deep'}."
   )
   parser.add_argument(
@@ -662,7 +682,7 @@ if __name__ == "__main__":
   parser.add_argument(
       "--just_test",
       type=str,
-      default="no",
+      default="yes",
       help="Valid model types: {'yes', 'no'}."
   )
   parser.add_argument(

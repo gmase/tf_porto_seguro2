@@ -91,11 +91,7 @@ def pintaGrafica(trainSet):
     for field in CSV_COLUMNS[2:]:
         campoEstudio=trainSet[field]
         campoEstudioPositives=campoEstudio[msk]
-        
-        #window_size = 30
-        #window = np.ones(window_size)/float(window_size)
-        #aapl_avg = np.convolve(campoEstudio, window, 'same')
-        
+        allBins=10
         p1 = figure(x_axis_type="linear", title=field)
         p1.grid.grid_line_alpha = 0
         p1.xaxis.axis_label = 'Field values'
@@ -110,14 +106,28 @@ def pintaGrafica(trainSet):
         p2.ygrid.band_fill_color = "olive"
         p2.ygrid.band_fill_alpha = 0.1
         
-        hist, edges = np.histogram(campoEstudio, density=False, bins=10)
-        p1.quad(top=hist*100/total, bottom=0, left=edges[:-1], right=edges[1:],
-            fill_color="#036564", line_color="#033649")
+        if "cat" in field:
+            allBins=sorted(campoEstudio.unique())
+            hist=np.bincount(campoEstudio+1)
+            p1.quad(top=hist*100/total, bottom=0, left=allBins[0], right=allBins[-1],fill_color="#036564", line_color="#033649")
             
-        hist2, edges2 = np.histogram(campoEstudioPositives, density=False, bins=10)
-        hist2=hist2*100.0/hist
-        p2.quad(top=hist2, bottom=0, left=edges2[:-1], right=edges2[1:],
-            fill_color="#036564", line_color="#033649")
+            hist2=np.bincount(campoEstudioPositives+1)
+            hist2=hist2*100.0/hist
+            p2.quad(top=hist2, bottom=0, left=allBins[0], right=allBins[-1],fill_color="#036564", line_color="#033649")
+        else:
+            hist, edges = np.histogram(campoEstudio, density=False, bins=allBins)
+            p1.quad(top=hist*100/total, bottom=0, left=edges[:-1], right=edges[1:],
+                fill_color="#036564", line_color="#033649")
+                
+            hist2, edges2 = np.histogram(campoEstudioPositives, density=False, bins=allBins)
+            hist2=hist2*100.0/hist
+            p2.quad(top=hist2, bottom=0, left=edges2[:-1], right=edges2[1:],
+                fill_color="#036564", line_color="#033649")
+        
+        
+        #window_size = 30
+        #window = np.ones(window_size)/float(window_size)
+        #aapl_avg = np.convolve(campoEstudio, window, 'same')
             
         p2.legend.location = "top_left"
         fullGrid.append([p1,p2])
@@ -137,7 +147,9 @@ def main():
         skipinitialspace=True,
         engine="python",
         skiprows=1)
-    ind_05_classes = trainSet['ps_ind_05_cat'].unique()
+    ind_05_classes = trainSet['ps_car_08_cat'].unique()
+    print np.bincount(trainSet['ps_car_08_cat'])
+    print ind_05_classes
     pintaGrafica(trainSet)
     """
     trainSet=pd.read_csv(filepath_or_buffer='train.csv',sep=',', delimiter=None, header='infer')
