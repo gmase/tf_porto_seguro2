@@ -309,10 +309,10 @@ def componeSolucionFinal(deep_name,xgboost_name,choose_name):
    for v1,v2,c in zip(df_1.values,df_2.values,df_choose['choose']):
        f.write("{},".format(int(v1[0])))
        if c>=0.5:
-           val=(v1[1]*2.0+v2[1])/3.0
+           val=(v1[1]*3.0+v2[1]*2.0)/5.0
            cuenta_boost+=1
        else:
-           val=(v1[1]+2.0*v2[1])/3.0
+           val=(v1[1]*2.0+3.0*v2[1])/5.0
            cuenta_deep+=1
        f.write("{}\n".format(val))
    f.close()

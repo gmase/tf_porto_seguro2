@@ -279,32 +279,7 @@ deep_columns = [
     tf.feature_column.indicator_column(ps_calc_19_bin),
     tf.feature_column.indicator_column(ps_calc_20_bin)
 ]
-"""
-    ps_ind_06_bin,
-    ps_ind_07_bin,
-    ps_ind_08_bin,
-    ps_ind_09_bin,
-    ps_ind_10_bin,
-    ps_ind_11_bin,
-    ps_ind_12_bin,
-    ps_ind_13_bin,
-    ps_ind_16_bin,
-    ps_ind_17_bin,
-    ps_ind_18_bin,
-    ps_calc_15_bin,
-    ps_calc_16_bin,
-    ps_calc_17_bin,
-    ps_calc_18_bin,
-    ps_calc_19_bin,
-    ps_calc_20_bin
-"""
-    
-"""
-        optimizer=tf.train.ProximalAdagradOptimizer(#learning_rate=0.1,
-        learning_rate=learning_rate,
-        l1_regularization_strength=0.001
-        )
-"""
+
         
 def build_estimator(model_dir, model_type,learning_rate,layers):
   """Build an estimator."""
