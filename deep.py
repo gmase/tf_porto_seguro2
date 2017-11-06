@@ -17,6 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import pVariable
 import argparse
 import sys
 import tempfile
@@ -43,114 +44,12 @@ CSV_COLUMNS = [
     "id","reporta","ps_ind_01","ps_ind_02_cat","ps_ind_03","ps_ind_04_cat","ps_ind_05_cat","ps_ind_06_bin","ps_ind_07_bin","ps_ind_08_bin","ps_ind_09_bin","ps_ind_10_bin","ps_ind_11_bin","ps_ind_12_bin","ps_ind_13_bin","ps_ind_14","ps_ind_15","ps_ind_16_bin","ps_ind_17_bin","ps_ind_18_bin","ps_reg_01","ps_reg_02","ps_reg_03","ps_car_01_cat","ps_car_02_cat","ps_car_03_cat","ps_car_04_cat","ps_car_05_cat","ps_car_06_cat","ps_car_07_cat","ps_car_08_cat","ps_car_09_cat","ps_car_10_cat","ps_car_11_cat","ps_car_11","ps_car_12","ps_car_13","ps_car_14","ps_car_15","ps_calc_01","ps_calc_02","ps_calc_03","ps_calc_04","ps_calc_05","ps_calc_06","ps_calc_07","ps_calc_08","ps_calc_09","ps_calc_10","ps_calc_11","ps_calc_12","ps_calc_13","ps_calc_14","ps_calc_15_bin","ps_calc_16_bin","ps_calc_17_bin","ps_calc_18_bin","ps_calc_19_bin","ps_calc_20_bin"
 ]
 
-#bucketsOf=[5,2,7,12,2,10,2,18,2,2,2,5,3,105]
-bucketsOf=[6,3,8,13,3,11,3,19,3,3,3,6,4,106]
-bucketsOf=[i+2 for i in bucketsOf]
-
-binBuckets=[3 for i in range(17)]
-
-CATEGORICAL_COLS=[
-"ps_ind_02_cat",
-"ps_ind_04_cat",
-"ps_ind_05_cat",
-"ps_car_01_cat",
-"ps_car_02_cat",
-"ps_car_03_cat",
-"ps_car_04_cat",
-"ps_car_05_cat",
-"ps_car_06_cat",
-"ps_car_07_cat",
-"ps_car_08_cat",
-"ps_car_09_cat",
-"ps_car_10_cat",
-"ps_car_11_cat"]
-
-
-ps_ind_02_cat=tf.feature_column.categorical_column_with_identity( "ps_ind_02_cat", num_buckets=bucketsOf[0],default_value=bucketsOf[0]-1)
-ps_ind_04_cat=tf.feature_column.categorical_column_with_identity( "ps_ind_04_cat", num_buckets=bucketsOf[1],default_value=bucketsOf[1]-1)
-ps_ind_05_cat=tf.feature_column.categorical_column_with_identity( "ps_ind_05_cat", num_buckets=bucketsOf[2],default_value=bucketsOf[2]-1)
-ps_car_01_cat=tf.feature_column.categorical_column_with_identity( "ps_car_01_cat", num_buckets=bucketsOf[3],default_value=bucketsOf[3]-1)
-ps_car_02_cat=tf.feature_column.categorical_column_with_identity( "ps_car_02_cat", num_buckets=bucketsOf[4],default_value=bucketsOf[4]-1)
-ps_car_03_cat=tf.feature_column.categorical_column_with_identity( "ps_car_03_cat", num_buckets=bucketsOf[5],default_value=bucketsOf[5]-1)
-ps_car_04_cat=tf.feature_column.categorical_column_with_identity( "ps_car_04_cat", num_buckets=bucketsOf[6],default_value=bucketsOf[6]-1)
-ps_car_05_cat=tf.feature_column.categorical_column_with_identity( "ps_car_05_cat", num_buckets=bucketsOf[7],default_value=bucketsOf[7]-1)
-ps_car_06_cat=tf.feature_column.categorical_column_with_identity( "ps_car_06_cat", num_buckets=bucketsOf[8],default_value=bucketsOf[8]-1)
-ps_car_07_cat=tf.feature_column.categorical_column_with_identity( "ps_car_07_cat", num_buckets=bucketsOf[9],default_value=bucketsOf[9]-1)
-ps_car_08_cat=tf.feature_column.categorical_column_with_identity( "ps_car_08_cat", num_buckets=bucketsOf[10],default_value=bucketsOf[10]-1)
-ps_car_09_cat=tf.feature_column.categorical_column_with_identity( "ps_car_09_cat", num_buckets=bucketsOf[11],default_value=bucketsOf[11]-1)
-ps_car_10_cat=tf.feature_column.categorical_column_with_identity( "ps_car_10_cat", num_buckets=bucketsOf[12],default_value=bucketsOf[12]-1)
-ps_car_11_cat=tf.feature_column.categorical_column_with_identity( "ps_car_11_cat", num_buckets=bucketsOf[13],default_value=bucketsOf[13]-1)
-
-
-
-
-"""
-ps_ind_06_bin=tf.feature_column.numeric_column("ps_ind_06_bin")
-ps_ind_07_bin=tf.feature_column.numeric_column("ps_ind_07_bin")
-ps_ind_08_bin=tf.feature_column.numeric_column("ps_ind_08_bin")
-ps_ind_09_bin=tf.feature_column.numeric_column("ps_ind_09_bin")
-ps_ind_10_bin=tf.feature_column.numeric_column("ps_ind_10_bin")
-ps_ind_11_bin=tf.feature_column.numeric_column("ps_ind_11_bin")
-ps_ind_12_bin=tf.feature_column.numeric_column("ps_ind_12_bin")
-ps_ind_13_bin=tf.feature_column.numeric_column("ps_ind_13_bin")
-ps_ind_16_bin=tf.feature_column.numeric_column("ps_ind_16_bin")
-ps_ind_17_bin=tf.feature_column.numeric_column("ps_ind_17_bin")
-ps_ind_18_bin=tf.feature_column.numeric_column("ps_ind_18_bin")
-ps_calc_15_bin=tf.feature_column.numeric_column("ps_calc_15_bin")
-ps_calc_16_bin=tf.feature_column.numeric_column("ps_calc_16_bin")
-ps_calc_17_bin=tf.feature_column.numeric_column("ps_calc_17_bin")
-ps_calc_18_bin=tf.feature_column.numeric_column("ps_calc_18_bin")
-ps_calc_19_bin=tf.feature_column.numeric_column("ps_calc_19_bin")
-ps_calc_20_bin=tf.feature_column.numeric_column("ps_calc_20_bin")
-"""
-ps_ind_06_bin=tf.feature_column.categorical_column_with_identity( "ps_ind_06_bin", num_buckets=binBuckets[0],default_value=binBuckets[0]-1)
-ps_ind_07_bin=tf.feature_column.categorical_column_with_identity( "ps_ind_07_bin", num_buckets=binBuckets[1],default_value=binBuckets[1]-1)
-ps_ind_08_bin=tf.feature_column.categorical_column_with_identity( "ps_ind_08_bin", num_buckets=binBuckets[2],default_value=binBuckets[2]-1)
-ps_ind_09_bin=tf.feature_column.categorical_column_with_identity( "ps_ind_09_bin", num_buckets=binBuckets[3],default_value=binBuckets[3]-1)
-ps_ind_10_bin=tf.feature_column.categorical_column_with_identity( "ps_ind_10_bin", num_buckets=binBuckets[4],default_value=binBuckets[4]-1)
-ps_ind_11_bin=tf.feature_column.categorical_column_with_identity( "ps_ind_11_bin", num_buckets=binBuckets[5],default_value=binBuckets[5]-1)
-ps_ind_12_bin=tf.feature_column.categorical_column_with_identity( "ps_ind_12_bin", num_buckets=binBuckets[6],default_value=binBuckets[6]-1)
-ps_ind_13_bin=tf.feature_column.categorical_column_with_identity( "ps_ind_13_bin", num_buckets=binBuckets[7],default_value=binBuckets[7]-1)
-ps_ind_16_bin=tf.feature_column.categorical_column_with_identity( "ps_ind_16_bin", num_buckets=binBuckets[8],default_value=binBuckets[8]-1)
-ps_ind_17_bin=tf.feature_column.categorical_column_with_identity( "ps_ind_17_bin", num_buckets=binBuckets[9],default_value=binBuckets[9]-1)
-ps_ind_18_bin=tf.feature_column.categorical_column_with_identity( "ps_ind_18_bin", num_buckets=binBuckets[10],default_value=binBuckets[10]-1)
-ps_calc_15_bin=tf.feature_column.categorical_column_with_identity( "ps_calc_15_bin", num_buckets=binBuckets[11],default_value=binBuckets[11]-1)
-ps_calc_16_bin=tf.feature_column.categorical_column_with_identity( "ps_calc_16_bin", num_buckets=binBuckets[12],default_value=binBuckets[12]-1)
-ps_calc_17_bin=tf.feature_column.categorical_column_with_identity( "ps_calc_17_bin", num_buckets=binBuckets[13],default_value=binBuckets[13]-1)
-ps_calc_18_bin=tf.feature_column.categorical_column_with_identity( "ps_calc_18_bin", num_buckets=binBuckets[14],default_value=binBuckets[14]-1)
-ps_calc_19_bin=tf.feature_column.categorical_column_with_identity( "ps_calc_19_bin", num_buckets=binBuckets[15],default_value=binBuckets[15]-1)
-ps_calc_20_bin=tf.feature_column.categorical_column_with_identity( "ps_calc_20_bin", num_buckets=binBuckets[16],default_value=binBuckets[16]-1)
-
-
-
-ps_ind_01=tf.feature_column.numeric_column("ps_ind_01")
-ps_ind_03=tf.feature_column.numeric_column("ps_ind_03")
-ps_ind_14=tf.feature_column.numeric_column("ps_ind_14")
-ps_ind_15=tf.feature_column.numeric_column("ps_ind_15")
-
-ps_reg_01=tf.feature_column.numeric_column("ps_reg_01")
-ps_reg_02=tf.feature_column.numeric_column("ps_reg_02")
-ps_reg_03=tf.feature_column.numeric_column("ps_reg_03")
-ps_car_11=tf.feature_column.numeric_column("ps_car_11")
-ps_car_12=tf.feature_column.numeric_column("ps_car_12")
-ps_car_13=tf.feature_column.numeric_column("ps_car_13")
-ps_car_14=tf.feature_column.numeric_column("ps_car_14")
-ps_car_15=tf.feature_column.numeric_column("ps_car_15")
-ps_calc_01=tf.feature_column.numeric_column("ps_calc_01")
-ps_calc_02=tf.feature_column.numeric_column("ps_calc_02")
-ps_calc_03=tf.feature_column.numeric_column("ps_calc_03")
-ps_calc_04=tf.feature_column.numeric_column("ps_calc_04")
-ps_calc_05=tf.feature_column.numeric_column("ps_calc_05")
-ps_calc_06=tf.feature_column.numeric_column("ps_calc_06")
-ps_calc_07=tf.feature_column.numeric_column("ps_calc_07")
-ps_calc_08=tf.feature_column.numeric_column("ps_calc_08")
-ps_calc_09=tf.feature_column.numeric_column("ps_calc_09")
-ps_calc_10=tf.feature_column.numeric_column("ps_calc_10")
-ps_calc_11=tf.feature_column.numeric_column("ps_calc_11")
-ps_calc_12=tf.feature_column.numeric_column("ps_calc_12")
-ps_calc_13=tf.feature_column.numeric_column("ps_calc_13")
-ps_calc_14=tf.feature_column.numeric_column("ps_calc_14")
-
+data = pd.read_csv(
+      tf.gfile.Open(train_file_name),
+      names=CSV_COLUMNS,
+      skipinitialspace=True,
+      engine="python",
+      skiprows=1)
 
 
 # Transformations.
@@ -158,24 +57,11 @@ ps_calc_14=tf.feature_column.numeric_column("ps_calc_14")
 #    age, boundaries=[18, 25, 30, 35, 40, 45, 50, 55, 60, 65])
 
 # Wide columns and deep columns.
+"""
 base_columns = [
    ps_ind_01,ps_ind_02_cat,ps_ind_03,ps_ind_04_cat,ps_ind_05_cat,ps_ind_06_bin,ps_ind_07_bin,ps_ind_08_bin,ps_ind_09_bin,ps_ind_10_bin,ps_ind_11_bin,ps_ind_12_bin,ps_ind_13_bin,ps_ind_14,ps_ind_15,ps_ind_16_bin,ps_ind_17_bin,ps_ind_18_bin,ps_reg_01,ps_reg_02,ps_reg_03,ps_car_01_cat,ps_car_02_cat,ps_car_03_cat,ps_car_04_cat,ps_car_05_cat,ps_car_06_cat,ps_car_07_cat,ps_car_08_cat,ps_car_09_cat,ps_car_10_cat,ps_car_11_cat,ps_car_11,ps_car_12,ps_car_13,ps_car_14,ps_car_15,ps_calc_01,ps_calc_02,ps_calc_03,ps_calc_04,ps_calc_05,ps_calc_06,ps_calc_07,ps_calc_08,ps_calc_09,ps_calc_10,ps_calc_11,ps_calc_12,ps_calc_13,ps_calc_14,ps_calc_15_bin,ps_calc_16_bin,ps_calc_17_bin,ps_calc_18_bin,ps_calc_19_bin,ps_calc_20_bin,
 ]
-
-crossed_columns = [
-    tf.feature_column.crossed_column(
-        ["ps_car_01_cat",
-"ps_car_02_cat",
-"ps_car_03_cat",
-"ps_car_04_cat",
-"ps_car_05_cat",
-"ps_car_06_cat",
-"ps_car_07_cat",
-"ps_car_08_cat",
-"ps_car_09_cat",
-"ps_car_10_cat",
-"ps_car_11_cat"], hash_bucket_size=4000)
-]
+"""
 
 """
     tf.feature_column.embedding_column(ps_ind_02_cat, dimension=8),
@@ -229,59 +115,8 @@ dimensionForEmbedding=[3,2,4,5,2,4,2,5,2,2,2,3,3,10]
     tf.feature_column.embedding_column(ps_car_11_cat, dimensionForEmbedding[13]),
 """
     
-deep_columns = [
-    tf.feature_column.indicator_column(ps_ind_02_cat),
-    tf.feature_column.indicator_column(ps_ind_04_cat),
-    tf.feature_column.indicator_column(ps_ind_05_cat),
-    ps_ind_01,
-    ps_ind_03,
-    ps_ind_14,
-    ps_ind_15,
-    ps_reg_01,
-    ps_reg_02,
-    ps_reg_03,
-    ps_car_11,
-    ps_car_12,
-    ps_car_13,
-    ps_car_14,
-    ps_car_15,
-    ps_calc_01,
-    ps_calc_02,
-    ps_calc_03,
-    ps_calc_04,
-    ps_calc_05,
-    ps_calc_06,
-    ps_calc_07,
-    ps_calc_08,
-    ps_calc_09,
-    ps_calc_10,
-    ps_calc_11,
-    ps_calc_12,
-    ps_calc_13,
-    ps_calc_14,
-    
-
-    tf.feature_column.indicator_column(ps_ind_06_bin),
-    tf.feature_column.indicator_column(ps_ind_07_bin),
-    tf.feature_column.indicator_column(ps_ind_08_bin),
-    tf.feature_column.indicator_column(ps_ind_09_bin),
-    tf.feature_column.indicator_column(ps_ind_10_bin),
-    tf.feature_column.indicator_column(ps_ind_11_bin),
-    tf.feature_column.indicator_column(ps_ind_12_bin),
-    tf.feature_column.indicator_column(ps_ind_13_bin),
-    tf.feature_column.indicator_column(ps_ind_16_bin),
-    tf.feature_column.indicator_column(ps_ind_17_bin),
-    tf.feature_column.indicator_column(ps_ind_18_bin),
-    tf.feature_column.indicator_column(ps_calc_15_bin),
-    tf.feature_column.indicator_column(ps_calc_16_bin),
-    tf.feature_column.indicator_column(ps_calc_17_bin),
-    tf.feature_column.indicator_column(ps_calc_18_bin),
-    tf.feature_column.indicator_column(ps_calc_19_bin),
-    tf.feature_column.indicator_column(ps_calc_20_bin)
-]
-
         
-def build_estimator(model_dir, model_type,learning_rate,layers):
+def build_estimator(model_dir, model_type,learning_rate,layers,deep_columns):
   """Build an estimator."""
   if model_type == "wide":
     m = tf.estimator.LinearClassifier(
@@ -299,14 +134,6 @@ def build_estimator(model_dir, model_type,learning_rate,layers):
         hidden_units=layers,
         optimizer=tf.train.AdagradOptimizer( learning_rate=learning_rate)
     )
-    
-  else:
-    m = tf.estimator.DNNLinearCombinedClassifier(
-        model_dir=model_dir,
-        linear_feature_columns=crossed_columns,
-        dnn_feature_columns=deep_columns,
-        dnn_hidden_units=layers
-        )
   return m
 
 
@@ -337,7 +164,7 @@ def input_predict(data_file, num_epochs, shuffle):
       num_threads=1)
 
 
-def train_and_eval(model_dir, model_type, train_steps, train_data, test_data,just_test,learning_rate,layers):
+def train_and_eval(model_dir, model_type, train_steps, train_data, test_data,just_test,learning_rate,layers,deep_columns):
   """Train and evaluate the model."""
   #train_file_name, test_file_name = maybe_download(train_data, test_data)
   
@@ -351,7 +178,7 @@ def train_and_eval(model_dir, model_type, train_steps, train_data, test_data,jus
   # remove NaN elements
   train_df = train_df.dropna(how="any", axis=0)
   model_dir = tempfile.mkdtemp() if not model_dir else model_dir
-  m = build_estimator(model_dir, model_type,learning_rate,layers)
+  m = build_estimator(model_dir, model_type,learning_rate,layers,deep_columns)
 
   if just_test=="yes":
         X_train, X_test = train_test_split(train_df, test_size=0.2, random_state=42)
@@ -565,13 +392,41 @@ def main(_):
     train_and_evalOnlyMM(FLAGS.model_dir, FLAGS.model_type, FLAGS.train_steps,
                  FLAGS.train_data, FLAGS.test_data,FLAGS.just_test,0.07,[1024, 512, 256])    
     
-    train_and_evalOnlyMM(FLAGS.model_dir, FLAGS.model_type, FLAGS.train_steps,
-                 FLAGS.train_data, FLAGS.test_data,FLAGS.just_test,0.07,[1024, 512, 256])
-    sys.exit("Quieto parao")
     
     train_and_evalMM(FLAGS.model_dir, FLAGS.model_type, FLAGS.train_steps,
                  FLAGS.train_data, FLAGS.test_data,FLAGS.just_test,0.07,[1024, 512, 256])
     sys.exit("Quieto parao")
+    
+    """
+    variables=pVariable.pVariables(CSV_COLUMNS[2:],data,True)
+
+    
+    deep_columns = [i.getTfVariable() for i in variables.vars]
+    res=[]
+    repeticiones=1
+    for i in range(repeticiones):
+          res.append(train_and_eval(FLAGS.model_dir, FLAGS.model_type, FLAGS.train_steps,
+                 FLAGS.train_data, FLAGS.test_data,FLAGS.just_test,0.07,[1024, 512, 256],deep_columns))
+    auc=sum(res)/repeticiones
+    print("auc: {}  gini: {}".format(auc,auc*2-1))
+    f.write('Media de las ultimas {} iteraciones: {} Gini:{}'.format(repeticiones,auc,auc*2-1))
+    prev_auc=auc
+    
+    """
+    for numIter in range(10):
+        deep_columns = [i.getTfVariable() for i in variables.getSubset(0.9)]
+        res=[]
+        repeticiones=2
+        for i in range(repeticiones):
+              res.append(train_and_eval(FLAGS.model_dir, FLAGS.model_type, FLAGS.train_steps,
+                     FLAGS.train_data, FLAGS.test_data,FLAGS.just_test,0.07,[1024, 512, 256],deep_columns))
+        auc=sum(res)/repeticiones
+        print("auc: {}  gini: {}".format(auc,auc*2-1))
+        f.write('Media de las ultimas {} iteraciones: {} Gini:{}'.format(repeticiones,auc,auc*2-1))
+        variables.update(auc-prev_auc)
+        variables.printValues()
+        prev_auc=auc
+    variables.printValues()
     """
     
     """
@@ -583,10 +438,8 @@ def main(_):
     auc=sum(res)/repeticiones
     print("auc: {}  gini: {}".format(auc,auc*2-1))
     f.write('Media de las ultimas {} iteraciones: {} Gini:{}'.format(repeticiones,auc,auc*2-1))
-    """
-
     
-    
+        
     res=[]
     repeticiones=4
     for i in range(repeticiones):
@@ -595,7 +448,7 @@ def main(_):
     auc=sum(res)/repeticiones
     print("auc: {}  gini: {}".format(auc,auc*2-1))
     f.write('Media de las ultimas {} iteraciones: {} Gini:{}'.format(repeticiones,auc,auc*2-1))
-    
+
     res=[]
     repeticiones=4
     for i in range(repeticiones):
@@ -622,6 +475,7 @@ def main(_):
     auc=sum(res)/repeticiones
     print("auc: {}  gini: {}".format(auc,auc*2-1))
     f.write('Media de las ultimas {} iteraciones: {} Gini:{}'.format(repeticiones,auc,auc*2-1))
+    """
     f.close()
 
     
@@ -639,7 +493,7 @@ if __name__ == "__main__":
   parser.add_argument(
       "--model_type",
       type=str,
-      default="wide_n_deep",
+      default="deep2",
       help="Valid model types: {'wide', 'deep','deep2', 'wide_n_deep'}."
   )
   parser.add_argument(
@@ -657,7 +511,7 @@ if __name__ == "__main__":
   parser.add_argument(
       "--just_test",
       type=str,
-      default="yes",
+      default="no",
       help="Valid model types: {'yes', 'no'}."
   )
   parser.add_argument(

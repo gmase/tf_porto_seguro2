@@ -30,6 +30,8 @@ from datetime import datetime
 import xgboost as xgb
 import random
 import copy
+import pVariable
+from sklearn import preprocessing
 
 rutaOrigen='//home//gmase//Documents//tensorflow//tf_porto_seguro2//origin//'
 rutaProcesados='//home//gmase//Documents//tensorflow//tf_porto_seguro2//processed//'
@@ -41,44 +43,18 @@ train_file_name=rutaOrigen+'train.csv'
 
 
 
+
 CSV_COLUMNS = [
     "id","reporta","ps_ind_01","ps_ind_02_cat","ps_ind_03","ps_ind_04_cat","ps_ind_05_cat","ps_ind_06_bin","ps_ind_07_bin","ps_ind_08_bin","ps_ind_09_bin","ps_ind_10_bin","ps_ind_11_bin","ps_ind_12_bin","ps_ind_13_bin","ps_ind_14","ps_ind_15","ps_ind_16_bin","ps_ind_17_bin","ps_ind_18_bin","ps_reg_01","ps_reg_02","ps_reg_03","ps_car_01_cat","ps_car_02_cat","ps_car_03_cat","ps_car_04_cat","ps_car_05_cat","ps_car_06_cat","ps_car_07_cat","ps_car_08_cat","ps_car_09_cat","ps_car_10_cat","ps_car_11_cat","ps_car_11","ps_car_12","ps_car_13","ps_car_14","ps_car_15","ps_calc_01","ps_calc_02","ps_calc_03","ps_calc_04","ps_calc_05","ps_calc_06","ps_calc_07","ps_calc_08","ps_calc_09","ps_calc_10","ps_calc_11","ps_calc_12","ps_calc_13","ps_calc_14","ps_calc_15_bin","ps_calc_16_bin","ps_calc_17_bin","ps_calc_18_bin","ps_calc_19_bin","ps_calc_20_bin"
 ]
 
-
-CATEGORICAL_COLS=[
-"ps_ind_02_cat",
-"ps_ind_04_cat",
-"ps_ind_05_cat",
-"ps_car_01_cat",
-"ps_car_02_cat",
-"ps_car_03_cat",
-"ps_car_04_cat",
-"ps_car_05_cat",
-"ps_car_06_cat",
-"ps_car_07_cat",
-"ps_car_08_cat",
-"ps_car_09_cat",
-"ps_car_10_cat",
-"ps_car_11_cat"]
-
-"""
-CATEGORICAL_COLS=[
-"ps_ind_02_cat",
-"ps_ind_04_cat",
-"ps_ind_05_cat",
-"ps_car_01_cat",
-"ps_car_02_cat",
-"ps_car_03_cat",
-"ps_car_04_cat",
-"ps_car_05_cat",
-"ps_car_06_cat",
-"ps_car_07_cat",
-"ps_car_08_cat",
-"ps_car_09_cat",
-"ps_car_10_cat"]
-"""
-
+data = pd.read_csv(
+      tf.gfile.Open(train_file_name),
+      names=CSV_COLUMNS,
+      skipinitialspace=True,
+      engine="python",
+      skiprows=1)
+variables=pVariable.pVariables(CSV_COLUMNS[2:],data,True)
 
 
 FLAGS = None
@@ -91,7 +67,7 @@ def createBinTest():
       engine="python",
       skiprows=1)
       
-    df_train = pd.get_dummies( df_train,columns = CATEGORICAL_COLS ).as_matrix()
+    df_train = pd.get_dummies( df_train,columns = variables.getCategoricals()).as_matrix()
     data=df_train[:,1:]
     dtrain = xgb.DMatrix(data, label=None)
     dtrain.save_binary(rutaProcesados+'test_full.buffer')
@@ -107,7 +83,7 @@ def createBin(div,name):
       engine="python",
       skiprows=1)
       
-    df_train = pd.get_dummies( df_train,columns = CATEGORICAL_COLS).as_matrix()
+    df_train = pd.get_dummies( df_train,columns = variables.getCategoricals()).as_matrix()
         
     if name=='_0':
         np.random.seed(42)
@@ -138,6 +114,7 @@ def createBin(div,name):
 def train_test(dtrain,dtest,param,num_round):
     progress = dict()
     evallist = [(dtest, 'eval'), (dtrain, 'train')]
+
     #,early_stopping_rounds=3
     bst = xgb.train(param, dtrain, num_round,evallist,evals_result=progress)
     #print('ultimo: {}'.format(bst.eval))
@@ -150,9 +127,23 @@ class Booster:
         self.max_depth=max_depth
         self.eta=eta
         self.num_round=num_round
-        self.param = {'max_depth': self.max_depth, 'eta': self.eta, 'silent': 1, 'objective': 'binary:logistic'}
+        self.param = {'max_depth': self.max_depth, 'eta': self.eta, 'silent': 1}
         self.param['nthread'] = 4
         self.param['eval_metric'] = 'auc'
+        
+        self.param['objective'] ='binary:logistic'        
+        #self.param['objective'] = 'rank:pairwise'
+        
+        """
+        self.param['objective'] = 'binary:logitraw'
+        self.param['objective'] = 'multi:softmax'
+        self.param['num_class'] = 2
+        self.param['objective'] = 'multi:softprob'
+        self.param['objective'] = 'reg:logistic'
+        self.param['objective'] = 'count:poisson' 0.62932
+        self.param['objective'] = 'rank:pairwise' 0.632882
+        """
+
         self.value=-1
         self.name="{}".format(name)
     def train_test(self,dtrain,dtest):
@@ -199,9 +190,12 @@ class Booster:
         if self.num_round<=2:
             self.num_round=3
             
-        self.param = {'max_depth': self.max_depth, 'eta': self.eta, 'silent': 1, 'objective': 'binary:logistic'}
+        self.param = {'max_depth': self.max_depth, 'eta': self.eta, 'silent': 1}
         self.param['nthread'] = 4
         self.param['eval_metric'] = 'auc'
+        self.param['objective'] = 'binary:logistic'
+
+        
         if addM:
             self.updateName('M')
 
@@ -254,8 +248,13 @@ class Booster:
     
 def getOutput(depth,rounds,eta,train,test,name):
     adan=Booster(depth,eta,rounds,'no_name')
-    adan.evaluate(train,test,name)
+    adan.evaluate(train,test,name) 
     
+def testOne(depth,rounds,eta,train,test):
+    adan=Booster(depth,eta,rounds,'no_name')
+    adan.train_test(train,test)
+    print('{} -- {}'.format(adan.value,adan.muestrate()))
+
     
 def createBuffers():
     createBin(0.8,'_0')
@@ -280,7 +279,7 @@ def evolve():
     f = open('eval_log.csv', 'a')
     f.write('\n')
  
-    generation_number=20 
+    generation_number=15 
     
     for gen in range(generation_number):
         for i in population:
@@ -310,8 +309,6 @@ def main(_):
 
     #createBuffers()
 
-
-    
     #Step 2 evolve
     #evolve()
     #sys.exit("Quieto parao")
@@ -326,25 +323,56 @@ def main(_):
     #depth: 2  rounds: 20  eta: 0.3 auc: 0.632719 caca
     #depth: 4  rounds: 39  eta: 0.3 auc: 0.64922
     #depth: 5  rounds: 33  eta: 0.27 auc: 0.637384
+    #depth: 5  rounds: 36  eta: 0.36 auc: 0.63671 -- pairwise
+    #depth: 3  rounds: 39  eta: 0.36 auc: 0.636124 --Kaggle 0.272 tanto con las variables calc como sin ellas
 
+    
+    """
+    dtrain_full = xgb.DMatrix(rutaProcesados+'train_train_0.buffer')
+    dtest_full = xgb.DMatrix(rutaProcesados+'train_test_0.buffer')
+    adan=Booster(3,0.36,39,'no_name')
+    adan.train_test(dtrain_full,dtest_full)
+    sys.exit("Quieto parao")
+    """
     
     dtrain_full = xgb.DMatrix(rutaProcesados+'train_full.buffer')
     dtest_full = xgb.DMatrix(rutaProcesados+'test_full.buffer')
-    getOutput(5,33,0.27,dtrain_full,dtest_full,rutaOutputXgboost+'xgboost_full.csv')
-    #sys.exit("Quieto parao")
+    getOutput(3,39,0.36,dtrain_full,dtest_full,rutaOutputXgboost+'xgboost_full.csv')
+    sys.exit("Quieto parao")
+    
     
     
     #Step 4 predict for test set
-    dtrain_full = xgb.DMatrix(rutaProcesados+'train_full.buffer')
-    getOutput(5,33,0.27,dtrain_full,dtrain_full,rutaOutputXgboost+'xgboost_train_full.csv')
+    #dtrain_full = xgb.DMatrix(rutaProcesados+'train_full.buffer')
+    #dtest_full = xgb.DMatrix(rutaProcesados+'test_full.buffer')
+    #getOutput(5,36,0.36,dtrain_full,dtest_full,rutaOutputXgboost+'xgboost_full.csv')
+    
+    """
+    df_data = pd.read_csv(filepath_or_buffer='//home//gmase//Documents//tensorflow//tf_porto_seguro2//xgboost_output//xgboost_full.csv')
+    x = df_data['target'].values.astype(float)
+    x = x.reshape(-1,1)
+    # Create a minimum and maximum processor object
+    min_max_scaler = preprocessing.MinMaxScaler()
+    # Create an object to transform the data to fit minmax processor
+    x_scaled = min_max_scaler.fit_transform(x)
+    # Run the normalizer on the dataframe
+    df_normalized = pd.DataFrame(x_scaled,columns=['target'])
+    df_normalized['id']=df_data['id']
+    df_normalized.to_csv(path_or_buf='//home//gmase//Documents//tensorflow//tf_porto_seguro2//xgboost_output//xgboost_full2.csv',index=False,columns=['id','target'])
+    """
+
+    #getOutput(5,0.27,33,dtrain_full,dtrain_full,rutaOutputXgboost+'xgboost_train_full.csv')
     
 
     #w = np.random.rand(5, 1)
     #dtrain = xgb.DMatrix(data, label=label, missing=-999.0, weight=w)
 
-
-    
-
+    """
+    dtrain_full = xgb.DMatrix(rutaProcesados+'train_full.buffer')
+    dtest_full = xgb.DMatrix(rutaProcesados+'test_full.buffer')
+    getOutput(5,20,0.3,dtrain_full,dtest_full,rutaOutputXgboost+'xgboost_full.csv')
+    sys.exit("Quieto parao")
+    """
     
                  
 

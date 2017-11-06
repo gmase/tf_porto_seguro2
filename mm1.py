@@ -89,8 +89,8 @@ FLAGS = None
         
 def createBin(div,dtrain_full):
       
-    dtrain = xgb.DMatrix('//home//gmase//Documents//tensorflow//tf_porto_seguro//xgboost//train_0.buffer')
-    dtest = xgb.DMatrix('//home//gmase//Documents//tensorflow//tf_porto_seguro//xgboost//test_0.buffer')
+    dtrain = xgb.DMatrix(rutaOutputXgboost+'train_0.buffer')
+    dtest = xgb.DMatrix(rutaOutputXgboost+'test_0.buffer')
     
     
     msk = np.random.rand(len(df_train)) < div
@@ -426,12 +426,12 @@ def main(_):
     #xgboostFails(rutaOutputXgboost+'xgboost_train_full.csv',train_file_name)
     
     #Step2 train the model
-    #trainMetaModel(1)
+    trainMetaModel(1)
     
     #Step2 compose the output
     #genOutput()
     
-    #compare_results(rutaOutputXgboost+'xgboost_train_full.csv',rutaOutputDeep+'deep_train_full.csv',train_file_name)
+    compare_results(rutaOutputXgboost+'xgboost_train_full.csv',rutaOutputDeep+'deep_train_full.csv',train_file_name)
 
     #trainMetaModel(5)
     genOutput()
