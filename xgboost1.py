@@ -74,8 +74,6 @@ def createBinTest():
 
         
 def createBin(div,name):
-    
-
     df_train = pd.read_csv(
       tf.gfile.Open(train_file_name),
       names=CSV_COLUMNS,
@@ -307,7 +305,7 @@ def main(_):
 
     #Step 1 create buffer files
 
-    #createBuffers()
+    createBuffers()
 
     #Step 2 evolve
     #evolve()
@@ -325,7 +323,7 @@ def main(_):
     #depth: 5  rounds: 33  eta: 0.27 auc: 0.637384
     #depth: 5  rounds: 36  eta: 0.36 auc: 0.63671 -- pairwise
     #depth: 3  rounds: 39  eta: 0.36 auc: 0.636124 --Kaggle 0.272 tanto con las variables calc como sin ellas
-
+    #depth: 3  rounds: 37  eta: 0.36 auc: Kaggle 0.272 
     
     """
     dtrain_full = xgb.DMatrix(rutaProcesados+'train_train_0.buffer')
@@ -337,7 +335,7 @@ def main(_):
     
     dtrain_full = xgb.DMatrix(rutaProcesados+'train_full.buffer')
     dtest_full = xgb.DMatrix(rutaProcesados+'test_full.buffer')
-    getOutput(3,39,0.36,dtrain_full,dtest_full,rutaOutputXgboost+'xgboost_full.csv')
+    getOutput(3,37,0.36,dtrain_full,dtest_full,rutaOutputXgboost+'xgboost_full.csv')
     sys.exit("Quieto parao")
     
     
