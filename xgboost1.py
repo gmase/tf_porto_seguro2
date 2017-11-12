@@ -67,7 +67,10 @@ def createBinTest():
       engine="python",
       skiprows=1)
       
+    #variables.bucket(df_train)
     df_train = pd.get_dummies( df_train,columns = variables.getCategoricals()).as_matrix()
+
+    
     data=df_train[:,1:]
     dtrain = xgb.DMatrix(data, label=None)
     dtrain.save_binary(rutaProcesados+'test_full.buffer')
@@ -81,7 +84,10 @@ def createBin(div,name):
       engine="python",
       skiprows=1)
       
+    #transformar ind y calc bucketizar
+    #variables.bucket(df_train)
     df_train = pd.get_dummies( df_train,columns = variables.getCategoricals()).as_matrix()
+
         
     if name=='_0':
         np.random.seed(42)
@@ -305,7 +311,7 @@ def main(_):
 
     #Step 1 create buffer files
 
-    createBuffers()
+    #createBuffers()
 
     #Step 2 evolve
     #evolve()
@@ -324,6 +330,7 @@ def main(_):
     #depth: 5  rounds: 36  eta: 0.36 auc: 0.63671 -- pairwise
     #depth: 3  rounds: 39  eta: 0.36 auc: 0.636124 --Kaggle 0.272 tanto con las variables calc como sin ellas
     #depth: 3  rounds: 37  eta: 0.36 auc: Kaggle 0.272 
+    #0.269 with buckets
     
     """
     dtrain_full = xgb.DMatrix(rutaProcesados+'train_train_0.buffer')
@@ -332,6 +339,13 @@ def main(_):
     adan.train_test(dtrain_full,dtest_full)
     sys.exit("Quieto parao")
     """
+    
+    
+    dtrain_full = xgb.DMatrix(rutaProcesados+'train_train_0.buffer')
+    dtest_full = xgb.DMatrix(rutaProcesados+'train_train_0.buffer')
+    getOutput(3,37,0.36,dtrain_full,dtest_full,rutaOutputXgboost+'xgboost_para_mm2.csv')
+    sys.exit("Quieto parao")
+    
     
     dtrain_full = xgb.DMatrix(rutaProcesados+'train_full.buffer')
     dtest_full = xgb.DMatrix(rutaProcesados+'test_full.buffer')

@@ -165,9 +165,7 @@ def input_predict(data_file, num_epochs, shuffle):
 
 
 def train_and_eval(model_dir, model_type, train_steps, train_data, test_data,just_test,learning_rate,layers,deep_columns):
-  """Train and evaluate the model."""
-  #train_file_name, test_file_name = maybe_download(train_data, test_data)
-  
+  """Train and evaluate the model."""  
   #test_file_name='train.csv'
   train_df = pd.read_csv(
       tf.gfile.Open(train_file_name),
@@ -382,6 +380,37 @@ def train_and_evalSubsetMM(model_dir, model_type, train_steps, train_data, test_
   
     return 0
     
+def train_and_evalSubsetMM2(model_dir, model_type, train_steps, train_data, test_data,just_test,learning_rate,layers,deep_columns):
+    train_df_in = pd.read_csv(
+        tf.gfile.Open(train_file_name),
+        names=CSV_COLUMNS,
+        skipinitialspace=True,
+        engine="python",
+        skiprows=1)
+    np.random.seed(42)
+    msk = np.random.rand(len(train_df_in)) < 0.8
+    train = train_df_in[msk]
+    #test = train_df[~msk]
+    # remove NaN elements
+    train_df = train.dropna(how="any", axis=0)
+    model_dir = tempfile.mkdtemp() if not model_dir else model_dir
+    m = build_estimator(model_dir, model_type,learning_rate,layers,deep_columns)
+
+    m.train(
+          input_fn=input_fn(train_df, num_epochs=None,num_threads=5, shuffle=True),
+        steps=train_steps)
+
+    y = m.predict(input_fn=input_predict(train_file_name, num_epochs=1, shuffle=False))
+
+    f = open(rutaOutputDeep+'deep_para_mm2.csv', 'w')
+    f.write("id,target\n")
+    for i,p in enumerate(y):
+        f.write("{},{}\n".format(train['id'][i],p["probabilities"][1]))
+        
+    f.close()
+    
+
+    
 FLAGS = None
 
 
@@ -399,9 +428,14 @@ def main(_):
     
     """
     variables=pVariable.pVariables(CSV_COLUMNS[2:],data,True)
-
-    
     deep_columns = [i.getTfVariable() for i in variables.vars]
+    
+    
+    train_and_evalSubsetMM2(FLAGS.model_dir, FLAGS.model_type, FLAGS.train_steps,
+                 FLAGS.train_data, FLAGS.test_data,FLAGS.just_test,0.07,[1024, 512, 256],deep_columns)
+    sys.exit("Quieto parao")
+    
+    
     res=[]
     repeticiones=1
     for i in range(repeticiones):
@@ -511,7 +545,7 @@ if __name__ == "__main__":
   parser.add_argument(
       "--just_test",
       type=str,
-      default="no",
+      default="yes",
       help="Valid model types: {'yes', 'no'}."
   )
   parser.add_argument(

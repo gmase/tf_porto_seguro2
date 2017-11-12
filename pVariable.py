@@ -6,6 +6,7 @@ Created on Sat Nov  4 12:12:14 2017
 """
 import tensorflow as tf
 import numpy as np
+import pandas as pd
 
 class pVariables:
     def __init__(self,names,data,exclude):
@@ -84,6 +85,14 @@ class pVariables:
     def printValues(self):
         for i in self.vars:
             print("{}::{}").format(i.name,i.value)
+            
+    def bucket(self,df):
+        for i in self.vars:
+            if i.tipo=='cont':
+                hist,edges=np.histogram(df[i.name])
+                if len(hist)<9:
+                    print(i.name)
+                    df[i.name]=pd.cut(df[i.name],bins=edges,labels=False)
         
             
 class pVariable:
