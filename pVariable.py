@@ -7,6 +7,7 @@ Created on Sat Nov  4 12:12:14 2017
 import tensorflow as tf
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import OneHotEncoder
 
 class pVariables:
     def __init__(self,names,data,exclude):
@@ -85,6 +86,20 @@ class pVariables:
     def printValues(self):
         for i in self.vars:
             print("{}::{}").format(i.name,i.value)
+            
+    def replaceNulls(self,df):
+        for i in self.vars:
+            df.loc[df[i.name] == -1, i.name] = None
+    def oneHotify(self,df):
+        pd.get_dummies( df,columns = self.getCategoricals())
+        """
+        df[self.getCategoricals()]=df[self.getCategoricals()]+1
+        enc=OneHotEncoder()
+        enc.fit(df[self.getCategoricals()])
+        dropped=df.drop(self.getCategoricals(), axis=1).as_matrix()
+        encoded=enc.fit_transform(df[self.getCategoricals()]).toarray()-1
+        df=np.concatenate((dropped,encoded),axis=1)
+        """
             
     def bucket(self,df):
         for i in self.vars:

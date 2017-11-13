@@ -13,9 +13,15 @@ rutaProcesados='//home//gmase//Documents//tensorflow//tf_porto_seguro2//processe
 rutaOutputXgboost='//home//gmase//Documents//tensorflow//tf_porto_seguro2//xgboost_output//'
 rutaOutputDeep='//home//gmase//Documents//tensorflow//tf_porto_seguro2//deep_output//'
 
+test_file_name=rutaOrigen+'test.csv'
+train_file_name=rutaOrigen+'train.csv'
+
+
 df_xgboost = pd.read_csv(filepath_or_buffer=rutaOutputXgboost+'xgboost_para_mm2.csv')
 df_deep = pd.read_csv(filepath_or_buffer=rutaOutputDeep+'deep_para_mm2.csv')
+df_train = pd.read_csv(filepath_or_buffer=train_file_name)
 
+print(df_train.describe())
 print(df_xgboost.describe())
 print(df_deep.describe())
 sys.exit("Quieto parao")

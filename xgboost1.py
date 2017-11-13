@@ -32,6 +32,8 @@ import random
 import copy
 import pVariable
 from sklearn import preprocessing
+from xgboost import plot_tree
+import matplotlib.pyplot as plt
 
 rutaOrigen='//home//gmase//Documents//tensorflow//tf_porto_seguro2//origin//'
 rutaProcesados='//home//gmase//Documents//tensorflow//tf_porto_seguro2//processed//'
@@ -68,7 +70,10 @@ def createBinTest():
       skiprows=1)
       
     #variables.bucket(df_train)
-    df_train = pd.get_dummies( df_train,columns = variables.getCategoricals()).as_matrix()
+    variables.replaceNulls(df_train)
+    variables.oneHotify(df_train)
+    df_train=df_train.as_matrix()
+    #df_train = pd.get_dummies( df_train,columns = variables.getCategoricals()).as_matrix()
 
     
     data=df_train[:,1:]
@@ -85,8 +90,10 @@ def createBin(div,name):
       skiprows=1)
       
     #transformar ind y calc bucketizar
-    #variables.bucket(df_train)
-    df_train = pd.get_dummies( df_train,columns = variables.getCategoricals()).as_matrix()
+    variables.replaceNulls(df_train)
+    variables.oneHotify(df_train)
+    df_train=df_train.as_matrix()
+    #df_train = pd.get_dummies( df_train,columns = variables.getCategoricals()).as_matrix())
 
         
     if name=='_0':
@@ -216,7 +223,9 @@ class Booster:
         bst = xgb.train(self.param, dtrain_full, self.num_round)
         prediction=bst.predict(dtest_full)
         bst.save_model('0001.model')
-        
+        xgb.to_graphviz(bst, num_trees=2)   
+        xgb.plot_importance(bst)
+        xgb.plot_tree(bst, num_trees=2)
         
         timeStamp=datetime.now().strftime('%Y%m%d_%H%M%S')
         f = open(output_file, 'w')
@@ -307,11 +316,20 @@ def evolve():
     population[0].muestrate()
     f.close()
     
+def showModel():   
+    bst = xgb.Booster({'nthread': 4})  # init model
+    bst.load_model('0001.model')  # load data
+    #xgb.to_graphviz(bst, num_trees=2)   
+    plot_tree(bst,num_trees=0,rankdir='LR')
+    plt.show()
+    
+
+    
 def main(_):
 
     #Step 1 create buffer files
 
-    #createBuffers()
+    createBuffers()
 
     #Step 2 evolve
     #evolve()
@@ -330,6 +348,7 @@ def main(_):
     #depth: 5  rounds: 36  eta: 0.36 auc: 0.63671 -- pairwise
     #depth: 3  rounds: 39  eta: 0.36 auc: 0.636124 --Kaggle 0.272 tanto con las variables calc como sin ellas
     #depth: 3  rounds: 37  eta: 0.36 auc: Kaggle 0.272 
+    #depth: 3  rounds: 37  eta: 0.36 auc: Kaggle 0.274 Tratando nulls como None
     #0.269 with buckets
     
     """
@@ -339,13 +358,15 @@ def main(_):
     adan.train_test(dtrain_full,dtest_full)
     sys.exit("Quieto parao")
     """
+    #showModel()
+    #sys.exit("Quieto parao")
     
-    
+    """
     dtrain_full = xgb.DMatrix(rutaProcesados+'train_train_0.buffer')
     dtest_full = xgb.DMatrix(rutaProcesados+'train_train_0.buffer')
     getOutput(3,37,0.36,dtrain_full,dtest_full,rutaOutputXgboost+'xgboost_para_mm2.csv')
     sys.exit("Quieto parao")
-    
+    """
     
     dtrain_full = xgb.DMatrix(rutaProcesados+'train_full.buffer')
     dtest_full = xgb.DMatrix(rutaProcesados+'test_full.buffer')
@@ -385,8 +406,8 @@ def main(_):
     getOutput(5,20,0.3,dtrain_full,dtest_full,rutaOutputXgboost+'xgboost_full.csv')
     sys.exit("Quieto parao")
     """
-    
-                 
+
+     
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
